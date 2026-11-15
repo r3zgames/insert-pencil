@@ -12,7 +12,7 @@
 
 **[Play it in the browser](https://no2arca.de/)** · [Online scoreboard](https://no2arca.de/scores/) · [Download the latest release](../../releases/latest)
 
-No install, no account: it runs in Chrome, Edge, Firefox or Safari on a computer, tablet or phone, with a keyboard, mouse, touch or a game controller. On a phone it plays full screen with on-screen controls; add it to your home screen and it opens like an app. The download is one HTML file that works offline.
+No install, no account: it runs in Chrome, Edge, Firefox or Safari on a computer, tablet or phone, with a keyboard, mouse, touch or a game controller. On a phone it plays full screen with on-screen controls; add it to your home screen and it opens like an app. The download is one HTML file that works offline, and the release page also has desktop apps for macOS, Windows and Linux.
 
 ## At a glance
 

@@ -3,3 +3,8 @@ node_modules/
 tools/captures/
 .DS_Store
 *.tmp
+
+# Desktop app build (tools/desktop.sh)
+desktop/web/
+desktop/icon.png
+desktop/out/

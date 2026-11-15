@@ -22,3 +22,4 @@ dialog{width:min(94vw,calc(1800 * var(--ui)))}.stack{grid-template-columns:repea
 
 
 
+@supports (height:100dvh){:root{--ui:min(calc(100vw / 1920),calc(100dvh / 1080))}}

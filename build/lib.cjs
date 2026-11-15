@@ -57,7 +57,9 @@ function expandAssets(text) {
   return text.replace(ASSET_RE, (_, rel) => {
     const ext = path.extname(rel).slice(1), mime = EXT_MIME[ext];
     if (!mime) throw Error('Unknown asset type: ' + rel);
-    const data = fs.readFileSync(abs(rel));
+    // The web app manifest names its icons by token too: inside it they resolve beside the manifest (web build,
+    // both in a/) or as data URIs (single file, where a data: manifest has no address of its own).
+    const data = ext === 'webmanifest' ? Buffer.from(manifestAssets(readText(rel))) : fs.readFileSync(abs(rel));
     if (web.dir) {
       let name = web.written.get(rel);
       if (!name) { name = 'a/' + sha256(data).slice(0, 16) + '.' + ext; fs.mkdirSync(path.join(web.dir, 'a'), { recursive: true }); fs.writeFileSync(path.join(web.dir, name), data); web.written.set(rel, name); }
@@ -68,6 +70,8 @@ function expandAssets(text) {
 }
 
 const readText = rel => fs.readFileSync(abs(rel), 'utf8');
+// Web build: the manifest sits in a/, so its start page is one folder up.
+const manifestAssets = text => { const t = expandAssets(text).replace(/"a\/([0-9a-f]{16}\.[a-z0-9]+)"/g, '"$1"'); return web.dir ? t.replace('"start_url":"./"', '"start_url":"../","scope":"../"') : t; };
 
 // Recipes. Each returns the exact text of one part.
 function render(recipe) {

@@ -21,7 +21,7 @@ crons = ["*/20 * * * *"]
 [vars]
 # Origins allowed to call the API. "null" is the HTML opened from a file (file://); the others are GitHub Pages and
 # its custom domain.
-ALLOWED_ORIGINS = "null,https://relghazi.github.io,https://no2arca.de"
+ALLOWED_ORIGINS = "null,https://r3zgames.github.io,https://no2arca.de"
 MAX_BODY = "1900000"     # bytes per submission (a D1 value holds at most 2,000,000)
 MAX_STEPS = "432000"     # one hour of play at 120 Hz
 MAX_RUNS = "250000"      # input changes per replay
@@ -30,7 +30,7 @@ RATE_IP = "60"           # submissions per IP per window
 RATE_WINDOW = "3600"     # seconds
 RATE_REPORT = "5"        # detention slips per IP per window
 RATE_REPORTS = "50"      # detention slips per window from everyone
-DISPATCH = "relghazi/insert-pencil:leaderboard-verify.yml|runs,relghazi/insert-pencil:report-issues.yml|slips"
+DISPATCH = "r3zgames/insert-pencil:leaderboard-verify.yml|runs,r3zgames/insert-pencil:report-issues.yml|slips"
 # Secrets (wrangler secret put): IP_SALT, and ADMIN_TOKEN for the verifier's /admin endpoints (unset = no /admin);
 # GH_DISPATCH_TOKEN (optional) lets the cron start the GitHub workflows above (unset = the cron does nothing).
 # Free Workers plan: no replay runs in a request; server/verify.mjs replays pending runs outside Cloudflare.

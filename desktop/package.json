@@ -1,0 +1,13 @@
+{
+  "name": "no2-arcade",
+  "productName": "No. 2 Arcade",
+  "version": "0.0.0",
+  "description": "No. 2 Arcade desktop app: the website build of the game in Electron, offline except the online leaderboard.",
+  "main": "main.js",
+  "private": true,
+  "author": "R3Z Games LLC",
+  "devDependencies": {
+    "electron": "45.2.1",
+    "@electron/packager": "20.3.0"
+  }
+}
