@@ -15,6 +15,8 @@ const only = process.env.SWEEP_ONLY ? process.env.SWEEP_ONLY.split(',') : null;
 const DEVICES = [
   { name: 'iphone-portrait', w: 390, h: 844, dpr: 3, inset: { top: 59, bottom: 34 } },
   { name: 'iphone-landscape', w: 844, h: 390, dpr: 3, inset: { left: 59, right: 59, bottom: 21 } },
+  { name: 'ipadmini-portrait', w: 744, h: 1133, dpr: 2, inset: { top: 24, bottom: 20 } },
+  { name: 'ipadmini-landscape', w: 1133, h: 744, dpr: 2, inset: { top: 24, bottom: 20 } },
   { name: 'foldable-open', w: 841, h: 701, dpr: 2.6 },
   { name: 'tablet-8', w: 1024, h: 640, dpr: 2 },
   { name: 'tablet-10', w: 1280, h: 800, dpr: 2 },

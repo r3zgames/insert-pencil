@@ -1,7 +1,4 @@
 {
-  "env/locker-letters-1.png": "@@asset:assets/ui/locker-letters-1.webp@@",
-  "env/locker-letters-2.png": "@@asset:assets/ui/locker-letters-2.webp@@",
-  "env/locker-letters-3.png": "@@asset:assets/ui/locker-letters-3.webp@@",
   "env/nb-spread-blue.png": "@@asset:assets/ui/nb-spread-blue.webp@@",
   "env/nb-play-blue.png": "@@asset:assets/ui/nb-play-blue.webp@@",
   "env/nb-spread-red.png": "@@asset:assets/ui/nb-spread-red.webp@@",
