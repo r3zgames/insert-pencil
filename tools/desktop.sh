@@ -1,7 +1,9 @@
 #!/bin/sh
 # Desktop apps, released like Jimothy's: the website build in Electron for macOS (universal),
 # Windows (x64) and Linux (x64), zipped into Releases/ with SHA256SUMS-desktop.txt beside the single-file release.
-# macOS is ad-hoc signed and not notarized (first launch: right-click > Open); Windows is unsigned.
+# macOS gets an Icon Composer .icon (Liquid Glass, macOS 26+) beside the old .icns; it is signed and notarized by
+# desktop/sign-mac.mjs once a Developer ID certificate and the notarytool profile exist, ad-hoc signed until then.
+# Windows is unsigned.
 # Needs desktop/node_modules (cd desktop && npm install); Electron downloads its platform builds on first use.
 # Usage: sh tools/desktop.sh [mac|win|linux ...]   (default: all three)
 set -e
@@ -37,12 +39,20 @@ d = 'desktop/out/icon.iconset'; shutil.rmtree(d, ignore_errors=True); os.makedir
 for n in (16, 32, 128, 256, 512):
     tile(n).save(f'{d}/icon_{n}x{n}.png'); tile(n * 2).save(f'{d}/icon_{n}x{n}@2x.png')
 subprocess.run(['iconutil', '-c', 'icns', d, '-o', 'desktop/out/icon.icns'], check=True)
+# macOS 26 and later: an Icon Composer document beside it (the packager compiles it with Xcode's actool into
+# Assets.car); the square is full bleed and macOS rounds it itself. Older macOS keeps the .icns above.
+import json
+d = 'desktop/out/icon.icon'; shutil.rmtree(d, ignore_errors=True); os.makedirs(d + '/Assets')
+src.resize((1024, 1024), Image.LANCZOS).save(d + '/Assets/no2-arcade.png')
+json.dump({'fill': 'automatic', 'groups': [{'layers': [{'glass': False, 'image-name': 'no2-arcade.png', 'name': 'no2-arcade'}],
+  'shadow': {'kind': 'neutral', 'opacity': 0.5}, 'translucency': {'enabled': False, 'value': 0.5}}],
+  'supported-platforms': {'squares': ['macOS']}}, open(d + '/icon.json', 'w'), indent=2)
 EOF
 
 pack() { # platform arch icon
   desktop/node_modules/.bin/electron-packager desktop "$NAME" --platform="$1" --arch="$2" --icon="$3" \
     --app-version="$VERSION" --app-copyright="R3Z Games LLC" --out="$OUT" --overwrite --asar \
-    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='^/fuses\.cjs$' --ignore='\.DS_Store$' \
+    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='^/fuses\.cjs$' --ignore='^/sign-mac\.mjs$' --ignore='^/entitlements\.mac\.plist$' --ignore='\.DS_Store$' \
     --appBundleId=de.no2arca.arcade --appCategoryType=public.app-category.arcade-games \
     --win32metadata.CompanyName="R3Z Games LLC" --win32metadata.ProductName="$NAME" --win32metadata.FileDescription="$NAME" >/dev/null
 }
@@ -54,7 +64,7 @@ for t in $TARGETS; do
       pack darwin universal desktop/out/icon.icns
       APP="$OUT/$NAME-darwin-universal/$NAME.app"
       node desktop/fuses.cjs "$APP"
-      codesign --force --deep --sign - "$APP"
+      node desktop/sign-mac.mjs "$APP"
       rm -f "$REL/No2-Arcade-v$VERSION-macos.zip"
       ditto -c -k --keepParent "$APP" "$REL/No2-Arcade-v$VERSION-macos.zip" ;;
     win)
