@@ -1,3 +1,10 @@
-// The one thing the desktop app adds to the page: a way to quit (the website has none; the browser closes it).
+// What the desktop app adds to the page: a way to quit (the website has none; the browser closes it), and two
+// notices from the app: the window lost focus (the game pauses) and a menu command (settings, report a problem).
+// Only plain callbacks cross the bridge, never ipcRenderer itself (Electron's security checklist).
 const { contextBridge, ipcRenderer } = require('electron');
-contextBridge.exposeInMainWorld('No2Desktop', { quit: () => ipcRenderer.send('no2-quit'), platform: process.platform });
+contextBridge.exposeInMainWorld('No2Desktop', {
+  quit: () => ipcRenderer.send('no2-quit'),
+  platform: process.platform,
+  onBlur: fn => { ipcRenderer.on('no2-blur', () => fn()); },
+  onMenu: fn => { ipcRenderer.on('no2-menu', (e, what) => fn(String(what))); },
+});

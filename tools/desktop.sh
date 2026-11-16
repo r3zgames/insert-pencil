@@ -1,5 +1,5 @@
 #!/bin/sh
-# Desktop apps (owner 2026-11-15, like Jimothy's releases): the website build in Electron for macOS (universal),
+# Desktop apps, released like Jimothy's: the website build in Electron for macOS (universal),
 # Windows (x64) and Linux (x64), zipped into Releases/ with SHA256SUMS-desktop.txt beside the single-file release.
 # macOS is ad-hoc signed and not notarized (first launch: right-click > Open); Windows is unsigned.
 # Needs desktop/node_modules (cd desktop && npm install); Electron downloads its platform builds on first use.
@@ -41,8 +41,8 @@ EOF
 
 pack() { # platform arch icon
   desktop/node_modules/.bin/electron-packager desktop "$NAME" --platform="$1" --arch="$2" --icon="$3" \
-    --app-version="$VERSION" --app-copyright="R3Z Games LLC" --out="$OUT" --overwrite \
-    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='\.DS_Store$' \
+    --app-version="$VERSION" --app-copyright="R3Z Games LLC" --out="$OUT" --overwrite --asar \
+    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='^/fuses\.cjs$' --ignore='\.DS_Store$' \
     --appBundleId=de.no2arca.arcade --appCategoryType=public.app-category.arcade-games \
     --win32metadata.CompanyName="R3Z Games LLC" --win32metadata.ProductName="$NAME" --win32metadata.FileDescription="$NAME" >/dev/null
 }
@@ -53,17 +53,20 @@ for t in $TARGETS; do
       echo "macOS (universal)"
       pack darwin universal desktop/out/icon.icns
       APP="$OUT/$NAME-darwin-universal/$NAME.app"
+      node desktop/fuses.cjs "$APP"
       codesign --force --deep --sign - "$APP"
       rm -f "$REL/No2-Arcade-v$VERSION-macos.zip"
       ditto -c -k --keepParent "$APP" "$REL/No2-Arcade-v$VERSION-macos.zip" ;;
     win)
       echo "Windows (x64)"
       pack win32 x64 desktop/out/icon.ico
+      node desktop/fuses.cjs "$OUT/$NAME-win32-x64/$NAME.exe"
       rm -f "$REL/No2-Arcade-v$VERSION-windows.zip"
       (cd "$OUT/$NAME-win32-x64" && zip -q -r -9 "../../../$REL/No2-Arcade-v$VERSION-windows.zip" .) ;;
     linux)
       echo "Linux (x64)"
       pack linux x64 desktop/icon.png
+      node desktop/fuses.cjs "$OUT/$NAME-linux-x64/$NAME"
       rm -f "$REL/No2-Arcade-v$VERSION-linux.zip"
       (cd "$OUT/$NAME-linux-x64" && zip -q -r -y -9 "../../../$REL/No2-Arcade-v$VERSION-linux.zip" .) ;;
   esac

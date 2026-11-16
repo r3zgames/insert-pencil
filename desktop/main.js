@@ -1,4 +1,4 @@
-// No. 2 Arcade desktop app (owner 2026-11-15): Electron shows the website build (node build/build.cjs --web) from the
+// No. 2 Arcade desktop app: Electron shows the website build (node build/build.cjs --web) from the
 // app's own files, so images and sounds load only when shown, as on no2arca.de. The page is served at
 // https://no2arca.de/ from inside the app (never the network), so its own CSP ('self') and the leaderboard Worker's
 // allowed origins hold unchanged. Nothing else reaches the network: only the leaderboard origin read from the built
@@ -48,12 +48,29 @@ app.whenReady().then(() => {
   protocol.handle('http', () => new Response('blocked', { status: 403 }));
   session.defaultSession.setPermissionRequestHandler((wc, permission, done) => done(permission === 'fullscreen'));
 
+  // The Mac menu bar as Apple's guidelines lay it out: About (with the copyright), Settings (Command-comma, the game's
+  // own settings page), Hide and Quit; File with Close Window; Edit for the detention slip; View for full screen;
+  // Window; Help (the game's GitHub page, and the detention slip to report a problem). Windows and Linux: no menu bar.
+  const toPage = what => BrowserWindow.getAllWindows()[0]?.webContents.send('no2-menu', what);
   if (process.platform === 'darwin') {
+    app.setAboutPanelOptions({ applicationName: 'No. 2 Arcade', applicationVersion: app.getVersion(), version: '',
+      copyright: '\u00a9 2026 R3Z Games LLC. A game by Reza Elghazi.' });
     Menu.setApplicationMenu(Menu.buildFromTemplate([
-      { role: 'appMenu' },
+      { label: app.name, submenu: [
+        { role: 'about' }, { type: 'separator' },
+        { label: 'Settings\u2026', accelerator: 'Command+,', click: () => toPage('settings') }, { type: 'separator' },
+        { role: 'services' }, { type: 'separator' },
+        { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' },
+        { role: 'quit' },
+      ] },
+      { label: 'File', submenu: [{ role: 'close', label: 'Close Window' }] },
       { role: 'editMenu' },
       { label: 'View', submenu: [{ role: 'togglefullscreen' }] },
       { role: 'windowMenu' },
+      { role: 'help', submenu: [
+        { label: 'No. 2 Arcade Help', click: () => shell.openExternal('https://github.com/r3zgames/insert-pencil') },
+        { label: 'Report a Problem\u2026', click: () => toPage('report') },
+      ] },
     ]));
   } else Menu.setApplicationMenu(null);
 
@@ -77,7 +94,10 @@ app.whenReady().then(() => {
   });
   win.webContents.on('will-navigate', (e, url) => { if (new URL(url).hostname !== HOST) e.preventDefault(); });
   win.on('close', () => saveState(win));
-  ipcMain.on('no2-quit', () => { saveState(win); app.quit(); });
+  // Apple: a game pauses when the player leaves it; the page opens its pause sheet when the window loses focus.
+  win.on('blur', () => win.webContents.send('no2-blur'));
+  // Only the game's own page may ask to quit (Electron's checklist: validate the sender of every IPC message).
+  ipcMain.on('no2-quit', e => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return; saveState(win); app.quit(); });
   win.loadURL(`https://${HOST}/`);
 });
 

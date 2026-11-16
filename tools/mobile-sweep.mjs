@@ -1,4 +1,4 @@
-// Phone and tablet sweep (guideline review 2026-11-15): real Chrome with touch emulation at phone, foldable and
+// Phone and tablet sweep (from the Apple and Android guideline review): real Chrome with touch emulation at phone, foldable and
 // tablet sizes, safe-area insets emulated where Chrome supports it. Locker, a notebook title page, settings, the
 // detention slip, touch play, a simulated WebGL context loss, and a fold/unfold resize.
 // Usage: node tools/mobile-sweep.mjs [html] [outDir]

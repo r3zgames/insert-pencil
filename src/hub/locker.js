@@ -93,7 +93,7 @@ const FLAT={l:1522,r:4002,t:516,b:2462},PAGE_EDGE=2500;
 const CURL=[[1472,1980],[1490,2050],[1560,2130],[1640,2180],[1720,2202],[1770,2210],[1795,2218],[1817,2255],[1820,2290],[1825,2370],[1840,2420],[1865,2465],[1915,2497]];
 function curlX(y){if(y<CURL[0][1])return 0;for(let i=1;i<CURL.length;i++){const[x0,y0]=CURL[i-1],[x1,y1]=CURL[i];if(y<=y1)return x0+(x1-x0)*(y-y0)/(y1-y0)}return CURL[CURL.length-1][0]}
 
-function loadImage(name){const src=g.LocalImages&&g.LocalImages[name];if(!src)return Promise.reject(Error('Missing image '+name));const i=new Image();i.src=src;return i.decode().then(()=>i)}
+function loadImage(name){const src=g.LocalImages&&g.LocalImages[name];if(!src)return Promise.reject(Error('Missing image '+name));const i=new Image();i.src=src;/* WebKit (iPad) can reject decode() for an image that loaded fine: keep it then */return i.decode().then(()=>i,e=>i.complete&&i.naturalWidth?i:Promise.reject(e))}
 
 class LockerRenderer{
   constructor(canvas,assets){this.oldCanvas=canvas;this.assets=assets;this.paperFrames=new Map();this.app=null;this.canvas=null;this.selected=null;this.busy=false;this.openBook=null;this.key='';this.lift=null;this.set=0;this.pressUntil=0;this.dim=0}
@@ -108,7 +108,7 @@ class LockerRenderer{
     // Esc goes back to the title screen (no on-screen slip).
     const toTitle=()=>{const n=g.No2;if(!n||this.openBook||this.busy||n.intro?.active||$('desk-dialog')?.open||document.body.dataset.view!=='hub')return false;if(this.ace){this.leaveAce();return true}/* Esc in Ace's locker goes back to hers */n.intro.start(false);return true};// Only an Escape nothing else used (closing a dialog or the bag prevents its default first) goes back to the title.
     window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!e.defaultPrevented&&!e.repeat&&toTitle())e.preventDefault()});
-    const imgs=await Promise.all(['env/locker-1.png','env/locker-2.png','env/locker-3.png','env/locker-letters-1.png','env/locker-letters-2.png','env/locker-letters-3.png','env/locker-bag-peek.png'].map(loadImage));
+    /* the title layers are optional (empty since the spines were painted in; WebKit cannot decode an empty 3840 px layer, which hung the iPad on the loading cassette) */const imgs=await Promise.all(['env/locker-1.png','env/locker-2.png','env/locker-3.png','env/locker-letters-1.png','env/locker-letters-2.png','env/locker-letters-3.png','env/locker-bag-peek.png'].map((n,i)=>i>=3&&i<=5?loadImage(n).catch(()=>null):loadImage(n)));
     this.arts=imgs.slice(0,3);this.letters=imgs.slice(3,6);this.bagPeekArt=imgs[6];this.covers=new Map();
     // The pulled-out frames load after the locker is up; until one has, choosing that thing shows nothing extra.
     this.pulls={};loadImage('env/locker-pull-shoe-front.png').then(i=>{this.shoeFront=i},()=>{});loadImage('env/locker-pull-ball.png').then(i=>{this.ballSprite=i},()=>{});loadImage('env/locker-globe-map.png').then(im=>{const c=document.createElement('canvas');c.width=im.width;c.height=im.height;const q=c.getContext('2d');q.drawImage(im,0,0);this.globeMap={w:im.width,h:im.height,d:q.getImageData(0,0,im.width,im.height).data}},()=>{});loadImage('env/locker-globe-rim.png').then(im=>{this.globeRim=im},()=>{});for(const k of Object.keys(g.LockerPull||{}).filter(k=>k!=='labels'&&k!=='globe3d'))loadImage('env/locker-pull-'+k+'.png').then(i=>{this.pulls[k]=i;if(this.lift===k)this.draw()},()=>{});
@@ -252,7 +252,7 @@ class LockerRenderer{
     if(v.x>0||v.y>0||v.x+IW*v.s<W-1||v.y+IH*v.s<H-1){const cs=Math.max(W/IW,H/IH);x.save();/* blurred by drawing a tiny copy large (iPhone: Safari ignores a canvas filter, so the margins showed the painting repeated sharp) */if(!this.softArt||this.softArt.src!==this.art){const t=document.createElement('canvas');t.width=48;t.height=Math.round(48*IH/IW);const tg=t.getContext('2d');tg.imageSmoothingQuality='high';tg.drawImage(this.art,0,0,t.width,t.height);this.softArt={src:this.art,c:t}}x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(this.softArt.c,(W-IW*cs)/2,(H-IH*cs)/2,IW*cs,IH*cs);x.fillStyle='rgba(20,14,28,.35)';x.fillRect(0,0,W,H);x.restore()}
     const pulled=!this.openBook&&this.lift&&this.regionFor(this.lift),moved=null;
     // Under a pulled-out notebook's block the titles are left off: the block has them painted in.
-    const paint=()=>{x.drawImage(this.art,v.x,v.y,IW*v.s,IH*v.s);x.save();if(moved){x.beginPath();x.rect(0,0,W,H);x.rect(v.x+moved.x*v.s,v.y+moved.y*v.s,moved.w*v.s,moved.h*v.s);x.clip('evenodd')}x.drawImage(this.lettersNow(),v.x,v.y,IW*v.s,IH*v.s);x.restore();if(this.ace){this.paintAceTag(x,v);return}if(!this.openBook){this.paintBag(x,v);this.paintPadOnly(x,v)}this.paintCalendar(x,v);this.paintStickers(x,v);if(this.moonOn()&&!(this.lift==='globe'&&!this.openBook))this.drawMoon(x,v,0)};
+    const paint=()=>{x.drawImage(this.art,v.x,v.y,IW*v.s,IH*v.s);x.save();if(moved){x.beginPath();x.rect(0,0,W,H);x.rect(v.x+moved.x*v.s,v.y+moved.y*v.s,moved.w*v.s,moved.h*v.s);x.clip('evenodd')}{const L=this.lettersNow();if(L)x.drawImage(L,v.x,v.y,IW*v.s,IH*v.s)}x.restore();if(this.ace){this.paintAceTag(x,v);return}if(!this.openBook){this.paintBag(x,v);this.paintPadOnly(x,v)}this.paintCalendar(x,v);this.paintStickers(x,v);if(this.moonOn()&&!(this.lift==='globe'&&!this.openBook))this.drawMoon(x,v,0)};
     paint();
     const r=this.lift&&this.regionFor(this.lift);
     if(r&&!this.openBook&&r.key!=='stickers'){this.pullOut(x,v,r);
@@ -378,11 +378,11 @@ class LockerRenderer{
    const P=g.LockerPull?.[r.key],img=this.pulls?.[r.key],at=(q,p)=>[v.x+q.x*v.s,v.y+q.y*v.s,(q.w??q[2])*v.s,(q.h??q[3])*v.s];x.save();/* the slip's frame is the painting outside the slip (tools/pack-volleyball.py): drawn whole at once, so no second slip shows through a fade */x.globalAlpha=r.key==='report'?1:k;
    // The chosen notebook's spine lights up in place (the titles and emblems are painted on the spines now,
    // art-prompts/ui/spines/brief.md): the spine as painted, brighter, with a soft warm glow; for Ace his set's spine layer on top.
-   if(r.notebook){const S=this.spines(),i=this.ids().indexOf(r.key),b=S[i];if(b){const{x:lx,y:ly,w:lw,h:lh}=b,f=this.art.width/IW,L=this.lettersNow(),fl=L.width/IW,d=at({x:lx,y:ly,w:lw,h:lh});
+   if(r.notebook){const S=this.spines(),i=this.ids().indexOf(r.key),b=S[i];if(b){const{x:lx,y:ly,w:lw,h:lh}=b,f=this.art.width/IW,L=this.lettersNow(),fl=L?L.width/IW:1,d=at({x:lx,y:ly,w:lw,h:lh});
      // The glow stays on the shelf, never on the locker's walls.
      const c0=at({x:S[0].x,y:ly-200,w:S[S.length-1].x+S[S.length-1].w-S[0].x,h:lh+400});x.beginPath();x.rect(...c0);x.clip();
      x.shadowColor='rgba(255,248,226,.9)';x.shadowBlur=34*v.s*IW/1920*k;x.filter='brightness(1.18) saturate(.92)';x.drawImage(this.art,lx*f,ly*f,lw*f,lh*f,...d);
-     x.shadowColor='transparent';if(this.ace)x.drawImage(L,lx*fl,ly*fl,lw*fl,lh*fl,...d);x.filter='none'}x.restore();return}
+     x.shadowColor='transparent';if(this.ace&&L)x.drawImage(L,lx*fl,ly*fl,lw*fl,lh*fl,...d);x.filter='none'}x.restore();return}
    // His things lift in painted two-state frames like hers (replacing the code lifts; tools/pack-ace.py).
    // His jacket swings on its hook instead (the jacket moves, not the light behind it): the jacket
    // cut from his painting turning gently about the hook over the empty wall behind it (a Nano Banana edit), so no static copy shows.
@@ -450,8 +450,8 @@ class LockerRenderer{
     x.restore();return}
    if(r.key==='backpack'&&this.bagPeekArt){const B=BAG_PEEK;x.beginPath();x.rect(...at({...B,h:B.h-6}));x.clip();x.drawImage(this.bagPeekArt,...at(B));x.restore();this.paintBag(x,v);this.paintCalendar(x,v);return}
    if(P&&img){x.drawImage(img,...at(P));if(r.key==='daily'){x.save();x.globalAlpha=1;this.paintCalendar(x,v);x.restore()}
-    const L=this.letters[this.set],fl=L.width/IW,box=q=>at({x:q[0],y:q[1],w:q[2],h:q[3]});
-    for(const t of P.titles||[]){const[fx,fy,fw,fh]=t.from;x.save();x.beginPath();x.rect(...box(t.clip));x.clip();x.drawImage(L,fx*fl,fy*fl,fw*fl,fh*fl,...box(t.to));x.restore()}}
+    const L=this.letters[this.set],fl=L?L.width/IW:1,box=q=>at({x:q[0],y:q[1],w:q[2],h:q[3]});
+    if(L)for(const t of P.titles||[]){const[fx,fy,fw,fh]=t.from;x.save();x.beginPath();x.rect(...box(t.clip));x.clip();x.drawImage(L,fx*fl,fy*fl,fw*fl,fh*fl,...box(t.to));x.restore()}}
    x.restore()}
   lockerIdle(){return !!this.art&&!this.openBook&&!this.busy&&!document.hidden&&!g.No2?.intro?.active&&!$('desk-dialog')?.open}
   // One nudge: the lifted-notebook frame fades in rising, holds, and sinks back (about 1.6 s).
