@@ -50,7 +50,8 @@ app.whenReady().then(() => {
 
   // The Mac menu bar as Apple's guidelines lay it out: About (with the copyright), Settings (Command-comma, the game's
   // own settings page), Hide and Quit; File with Close Window; Edit for the detention slip; View for full screen;
-  // Window; Help (the game's GitHub page, and the detention slip to report a problem). Windows and Linux: no menu bar.
+  // Window; Help (the game's GitHub page, and the detention slip to report a problem). Settings and Report a Problem are
+  // dimmed while the start gate, title or intro comic shows (Apple: items that can't be used now are dimmed). Windows and Linux: no menu bar.
   const toPage = what => BrowserWindow.getAllWindows()[0]?.webContents.send('no2-menu', what);
   if (process.platform === 'darwin') {
     app.setAboutPanelOptions({ applicationName: 'No. 2 Arcade', applicationVersion: app.getVersion(), version: '',
@@ -58,7 +59,7 @@ app.whenReady().then(() => {
     Menu.setApplicationMenu(Menu.buildFromTemplate([
       { label: app.name, submenu: [
         { role: 'about' }, { type: 'separator' },
-        { label: 'Settings\u2026', accelerator: 'Command+,', click: () => toPage('settings') }, { type: 'separator' },
+        { id: 'no2-settings', label: 'Settings\u2026', accelerator: 'Command+,', enabled: false, click: () => toPage('settings') }, { type: 'separator' },
         { role: 'services' }, { type: 'separator' },
         { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' }, { type: 'separator' },
         { role: 'quit' },
@@ -69,7 +70,7 @@ app.whenReady().then(() => {
       { role: 'windowMenu' },
       { role: 'help', submenu: [
         { label: 'No. 2 Arcade Help', click: () => shell.openExternal('https://github.com/r3zgames/insert-pencil') },
-        { label: 'Report a Problem\u2026', click: () => toPage('report') },
+        { id: 'no2-report', label: 'Report a Problem\u2026', enabled: false, click: () => toPage('report') },
       ] },
     ]));
   } else Menu.setApplicationMenu(null);
@@ -97,6 +98,9 @@ app.whenReady().then(() => {
   // Apple: a game pauses when the player leaves it; the page opens its pause sheet when the window loses focus.
   win.on('blur', () => win.webContents.send('no2-blur'));
   // Only the game's own page may ask to quit (Electron's checklist: validate the sender of every IPC message).
+  // Settings and Report a Problem are dimmed until the page says they can open (not while the title or the comic shows).
+  ipcMain.on('no2-menu-ready', (e, on) => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return;
+    const m = Menu.getApplicationMenu(); for (const id of ['no2-settings', 'no2-report']) { const it = m?.getMenuItemById(id); if (it) it.enabled = on === true; } });
   ipcMain.on('no2-quit', e => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return; saveState(win); app.quit(); });
   win.loadURL(`https://${HOST}/`);
 });
