@@ -1050,9 +1050,12 @@
   "fast": "rápido",
   "slow": "lento",
   "mid": "centro",
-  "R3Z Games presents": "R3Z Games presenta"
+  "R3Z Games presents": "R3Z Games presenta",
+  "new version": "nueva versión",
+  "click to download it": "haz clic para descargarla"
  },
  "patterns": [
+  ["^version (\\d+\\.\\d+\\.\\d+) is out$", "ya salió la versión $1"],
   ["^version (.+)$", "versión $1"],
   ["^twin (\\d+)s$", "gemela $1 s"],
   ["^pepper (\\d+)$", "pimienta $1"],

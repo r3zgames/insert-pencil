@@ -98,6 +98,22 @@ app.whenReady().then(() => {
   // Apple: a game pauses when the player leaves it; the page opens its pause sheet when the window loses focus.
   win.on('blur', () => win.webContents.send('no2-blur'));
   // Only the game's own page may ask to quit (Electron's checklist: validate the sender of every IPC message).
+  // Update notice: once a launch, when the page asks (only while "share my scores online" is on), read the newest version
+  // from the game's own site (the real one: this app serves no2arca.de from its own files) and hand back a newer one with
+  // its release page. Nothing about the player is sent. NO2_OFFLINE=1 skips it; NO2_UPDATE_URL points it elsewhere for tests (and works with NO2_OFFLINE).
+  let update = null;
+  const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
+  const fromGame = e => new URL(e.senderFrame?.url || 'about:blank').origin === `https://${HOST}`;
+  ipcMain.handle('no2-update-check', async e => {
+    if (!fromGame(e) || (process.env.NO2_OFFLINE === '1' && !process.env.NO2_UPDATE_URL)) return null;
+    try {
+      const r = await net.fetch(process.env.NO2_UPDATE_URL || `https://${HOST}/version.json`, { bypassCustomProtocolHandlers: true, cache: 'no-store', signal: AbortSignal.timeout(8000) });
+      const v = await r.json();
+      if (!/^\d+\.\d+\.\d+$/.test(v.version) || !/^https:\/\/github\.com\/r3zgames\/insert-pencil\/releases\//.test(v.url) || !newer(v.version, app.getVersion())) return null;
+      update = v; return { version: v.version };
+    } catch { return null; }
+  });
+  ipcMain.on('no2-update-open', e => { if (fromGame(e) && update) shell.openExternal(update.url); });
   // Settings and Report a Problem are dimmed until the page says they can open (not while the title or the comic shows).
   ipcMain.on('no2-menu-ready', (e, on) => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return;
     const m = Menu.getApplicationMenu(); for (const id of ['no2-settings', 'no2-report']) { const it = m?.getMenuItemById(id); if (it) it.enabled = on === true; } });

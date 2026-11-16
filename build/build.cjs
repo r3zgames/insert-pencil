@@ -31,6 +31,9 @@ if (wi >= 0) {
   page = page.replace(cass[0], `<img data-src="${cass[1]}" alt=""><script>No2EarlySting.cassette()</script>`);
   page = page.slice(0, at) + '<script>' + earlyJs + '</script>' + page.slice(at);
   fs.writeFileSync(path.join(dir, 'index.html'), page);
+  // The desktop apps' update notice reads this (desktop/main.js, only while "share my scores online" is on): the newest
+  // version and its release page. Nothing about the player is sent to read it.
+  fs.writeFileSync(path.join(dir, 'version.json'), JSON.stringify({ version: manifest.version, url: `https://github.com/r3zgames/insert-pencil/releases/tag/v${manifest.version}` }) + '\n');
   let bytes = 0; for (const n of web.written.values()) bytes += fs.statSync(path.join(dir, n)).size;
   console.log(`WEB   ${path.relative(abs(''), dir)}/index.html  ${Buffer.byteLength(page)} bytes, ${web.written.size} assets ${Math.round(bytes / 1048576)} MB`);
   process.exit(0);
