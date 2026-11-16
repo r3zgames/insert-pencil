@@ -1,8 +1,8 @@
 {
-  "output": "No2-Arcade-v0.16.5.html",
-  "version": "0.16.5",
-  "lockedSha256": "6d13e46b6f160eb6db90ae37bf212570431384f1eea6391230a6eda17a60e4c3",
-  "lockedContentSha256": "6d13e46b6f160eb6db90ae37bf212570431384f1eea6391230a6eda17a60e4c3",
+  "output": "No2-Arcade-v0.16.6.html",
+  "version": "0.16.6",
+  "lockedSha256": "fa3e91ec50437b8cbea8b60e5f4018b7e9bd873b8df2576f782c90b185ffbdbc",
+  "lockedContentSha256": "fa3e91ec50437b8cbea8b60e5f4018b7e9bd873b8df2576f782c90b185ffbdbc",
   "readme": "src/release/README.txt",
   "document": {
     "template": "src/index.html",
