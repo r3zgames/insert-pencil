@@ -12,6 +12,18 @@ const WEB = path.join(__dirname, 'web');
 const HOST = 'no2arca.de';
 const STATE = () => path.join(app.getPath('userData'), 'window.json');
 
+// Startup and quit timings, written to timing.log beside window.json (this computer only, overwritten each launch) so a slow
+// start or quit on a player's machine can be told apart: time before this code runs (Windows Defender scanning a new app,
+// the disk), the window, the page's first frame, the locker, and each step of quitting.
+const BOOT = Date.now() - Math.round(process.uptime() * 1000);
+let logged = false;
+function mark(what) {
+  try { const line = `${String(Date.now() - BOOT).padStart(6)} ms  ${what}\n`, f = path.join(app.getPath('userData'), 'timing.log');
+    if (!logged) { logged = true; fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, `No. 2 Arcade ${app.getVersion()} ${process.platform} ${process.arch} ${new Date().toISOString()}\n` + line); }
+    else fs.appendFileSync(f, line); } catch {}
+}
+mark('app code starts (everything before this is the system starting the app)');
+
 // The leaderboard origin is whatever the built page's CSP allows to connect besides itself.
 function leaderboardOrigin() {
   try {
@@ -26,9 +38,26 @@ function saveState(win) {
   try { fs.writeFileSync(STATE(), JSON.stringify({ bounds: win.getNormalBounds(), fullScreen: win.isFullScreen() })); } catch {}
 }
 
+// The game's 1,858 pictures, sounds and fonts (185 MB) ship as plain files beside app.asar (resources/a), not inside it:
+// Windows Defender scanned the whole archive when the app opened it, so the cassette took minutes to show on Windows.
+// Each file is named after its own SHA-256, and the app serves it only when its contents still match that name, so the
+// files outside the archive stay as tamper-proof as the archive (whose hash Electron checks).
+const ASSETS = app.isPackaged ? path.join(process.resourcesPath, 'a') : path.join(WEB, 'a');
+const TYPES = { webp: 'image/webp', png: 'image/png', ico: 'image/x-icon', m4a: 'audio/mp4', ttf: 'font/ttf', webmanifest: 'application/manifest+json' };
+const crypto = require('node:crypto');
+async function serveAsset(name) {
+  const m = /^([0-9a-f]{16})\.([a-z0-9]+)$/.exec(name);
+  if (!m || !TYPES[m[2]]) return new Response('not found', { status: 404 });
+  let data;
+  try { data = await fs.promises.readFile(path.join(ASSETS, name)); } catch { return new Response('not found', { status: 404 }); }
+  if (crypto.createHash('sha256').update(data).digest('hex').slice(0, 16) !== m[1]) return new Response('changed', { status: 403 });
+  return new Response(data, { headers: { 'content-type': TYPES[m[2]] } });
+}
+
 function serveLocal(request) {
   const u = new URL(request.url);
   let rel = decodeURIComponent(u.pathname).replace(/^\/+/, '') || 'index.html';
+  if (rel.startsWith('a/')) return serveAsset(rel.slice(2));
   if (rel.endsWith('/')) rel += 'index.html';
   const file = path.resolve(WEB, rel);
   if (!file.startsWith(WEB + path.sep) || !fs.existsSync(file)) return new Response('not found', { status: 404 });
@@ -36,6 +65,7 @@ function serveLocal(request) {
 }
 
 app.whenReady().then(() => {
+  mark('Electron ready');
   // NO2_OFFLINE=1 (test runs): not even the leaderboard, so captures never send scores or play stats.
   const lb = process.env.NO2_OFFLINE ? null : leaderboardOrigin();
   // Every https request: the game's own files from the app, the leaderboard from the network, nothing else.
@@ -87,8 +117,14 @@ app.whenReady().then(() => {
     icon: path.join(__dirname, 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, sandbox: true, nodeIntegration: false, spellcheck: true },
   });
-  // Full screen like a console game unless the player left it last time (macOS ignores it before the window shows).
-  win.once('ready-to-show', () => { win.show(); if (st.fullScreen !== false) win.setFullScreen(true); });
+  mark('window created');
+  // The window shows at once (on its dark background) instead of waiting for the page's first frame, so a slow start never
+  // looks like nothing happened; full screen like a console game unless the player left it last time.
+  win.show(); if (st.fullScreen !== false) win.setFullScreen(true);
+  win.webContents.once('did-start-loading', () => mark('page starts loading'));
+  win.webContents.once('dom-ready', () => mark('page parsed'));
+  win.once('ready-to-show', () => mark('page first frame'));
+  win.once('close', () => mark('window closing'));
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https:\/\/(github\.com|www\.youtube\.com|youtube\.com|youtu\.be)\//.test(url)) shell.openExternal(url);
     return { action: 'deny' };
@@ -101,6 +137,7 @@ app.whenReady().then(() => {
   // Update notice: once a launch, when the page asks (only while "share my scores online" is on), read the newest version
   // from the game's own site (the real one: this app serves no2arca.de from its own files) and hand back a newer one with
   // its release page. Nothing about the player is sent. NO2_OFFLINE=1 skips it; NO2_UPDATE_URL points it elsewhere for tests (and works with NO2_OFFLINE).
+  const once = new Set(), markOnce = m => { if (!once.has(m)) { once.add(m); mark(m); } };
   let update = null;
   const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
   const fromGame = e => new URL(e.senderFrame?.url || 'about:blank').origin === `https://${HOST}`;
@@ -116,9 +153,15 @@ app.whenReady().then(() => {
   ipcMain.on('no2-update-open', e => { if (fromGame(e) && update) shell.openExternal(update.url); });
   // Settings and Report a Problem are dimmed until the page says they can open (not while the title or the comic shows).
   ipcMain.on('no2-menu-ready', (e, on) => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return;
+    if (on === true) markOnce('locker (or the comic) can be used'); else markOnce('game script running');
     const m = Menu.getApplicationMenu(); for (const id of ['no2-settings', 'no2-report']) { const it = m?.getMenuItemById(id); if (it) it.enabled = on === true; } });
-  ipcMain.on('no2-quit', e => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return; saveState(win); app.quit(); });
+  ipcMain.on('no2-quit', e => { if (new URL(e.senderFrame?.url || 'about:blank').origin !== `https://${HOST}`) return; mark('quit asked (Q on the locker or settings)'); saveState(win); app.quit(); });
   win.loadURL(`https://${HOST}/`);
 });
 
-app.on('window-all-closed', () => app.quit());
+app.on('window-all-closed', () => { mark('window closed'); app.quit(); });
+// Quitting never hangs: a last play-stats send or anything else still open gets 1.5 s, then the app ends (the window's
+// size and full screen are already saved when it closes).
+app.on('before-quit', () => { mark('quitting'); setTimeout(() => { mark('forced exit after 1.5 s'); app.exit(0); }, 1500); });
+app.on('will-quit', () => mark('will quit'));
+app.on('quit', () => mark('quit'));

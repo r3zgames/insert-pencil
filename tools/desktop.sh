@@ -53,7 +53,7 @@ EOF
 pack() { # platform arch icon
   desktop/node_modules/.bin/electron-packager desktop "$NAME" --platform="$1" --arch="$2" --icon="$3" \
     --app-version="$VERSION" --app-copyright="R3Z Games LLC" --out="$OUT" --overwrite --asar \
-    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='^/fuses\.cjs$' --ignore='^/sign-mac\.mjs$' --ignore='^/entitlements\.mac\.plist$' --ignore='\.DS_Store$' \
+    --ignore='^/out($|/)' --ignore='^/node_modules($|/)' --ignore='^/fuses\.cjs$' --ignore='^/sign-mac\.mjs$' --ignore='^/entitlements\.mac\.plist$' --ignore='\.DS_Store$' --ignore='^/web/a($|/)' --extra-resource=desktop/web/a \
     --appBundleId=de.no2arca.arcade --appCategoryType=public.app-category.arcade-games \
     --win32metadata.CompanyName="R3Z Games LLC" --win32metadata.ProductName="$NAME" --win32metadata.FileDescription="$NAME" >/dev/null
 }
