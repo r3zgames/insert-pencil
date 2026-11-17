@@ -27,7 +27,8 @@ a{color:var(--ink)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
 .grid{gap:26px 20px;padding-top:12px}
 /* Each game is a scrap of her ruled notebook paper, a little torn and crooked, held up by one strip of tape. */
-.scrap{position:relative;transform:rotate(var(--r,0deg));filter:drop-shadow(0 5px 8px rgba(60,40,10,.18));transition:transform .15s}
+/* its own layer: Chrome 157 left text of a rotated scrap with a filter unpainted */
+.scrap{position:relative;transform:rotate(var(--r,0deg));filter:drop-shadow(0 5px 8px rgba(60,40,10,.18));transition:transform .15s;will-change:transform}
 .scrap:hover,.scrap:focus-within{transform:rotate(var(--r,0deg)) translateY(-3px)}
 .card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;width:100%;padding:16px 14px 20px;background:#fdfaf2 url(ui/paper.webp) 0 0/420px auto;clip-path:var(--clip,none)}
 .card:focus-visible{outline:2px solid var(--ink);outline-offset:-6px}
@@ -84,7 +85,7 @@ main{padding-bottom:110px!important}
  </header>
  <div id="view" aria-live="polite"></div>
  <nav id="ruler" aria-label="what you can do here"></nav>
- <p class="legal">Scores are checked about every 20 minutes, so a new one can take a while to show up. Only initials and a random id are kept, no accounts; the developer can see each id's runs to check scores. Something wrong? Write it up on the detention slip behind her sneaker in the game's locker.</p>
+ <p class="legal">Scores are checked about every 20 minutes, so a new one can take a while to show up. Only initials and a random id are kept, no accounts; the developer can see each id's runs to check scores. Something wrong? Write it up on the detention slip taped to her locker door in the game.</p>
 </main>
 <script>
 const API='https://stats.no2arca.de';
