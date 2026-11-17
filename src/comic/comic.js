@@ -3,18 +3,19 @@
 // ('comic-page-3-fr'), else the English page.
 function comicPanels(){const L=globalThis.No2I18n?.lang||'en',P=No2AssetData.comic.panels;if(L==='en')return P;const ids=new Set((No2AssetData.assets||[]).map(a=>a.id));return P.map(p=>ids.has(p.asset+'-'+L)?{...p,asset:p.asset+'-'+L}:p)}
 (function(g){
-// The loading cassette's line: at the start gate it takes turns, fading through black, between how to
-// start, the version and a word about controllers ("controller ready", with that pad's painting below, once one is seen:
-// PlayStation 054c, Steam 28de, 8BitDo 2dc8, any other XBOX). The paintings under it fade to black one after another (CSS).
-const No2LoadingLine={timer:0,seen:'',
- pad(){const card=document.getElementById('loading-card'),w=card?.querySelector('.lc-pad');if(!w)return'';let p=null;try{p=[...(navigator.getGamepads?.()||[])].find(Boolean)}catch{}
-  if(!p)return this.seen;const id=String(p.id).toLowerCase(),k=/054c|playstation|dualsense|dualshock/.test(id)?'ps':/28de|steam/.test(id)?'steam':/2dc8|8bitdo/.test(id)?'8bitdo':'xbox';
-  if(w.dataset.pad!==k){w.dataset.pad=k;w.classList.add('seen')}return this.seen=k},
- start(go,first){if(!go)return;const t=s=>g.No2I18n?.t?.(s)??s,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;let i=0;
-  const lines=()=>[first,this.pad()?'controller ready':'connect a controller for the best experience','version '+(g.No2Catalog?.version||'')];
+// The loading cassette's line: at the start gate it takes turns, fading through black, between how to start, a word about
+// controllers and the version. A controller painting shows under it only during the controller turn, a different one each
+// time (XBOX, PlayStation, 8BitDo, Steam); once a controller is seen, that one and "controller ready" (PlayStation 054c,
+// Steam 28de, 8BitDo 2dc8, any other XBOX).
+const No2LoadingLine={timer:0,seen:'',n:0,
+ pad(){let p=null;try{p=[...(navigator.getGamepads?.()||[])].find(Boolean)}catch{}if(!p)return this.seen;
+  const id=String(p.id).toLowerCase();return this.seen=/054c|playstation|dualsense|dualshock/.test(id)?'ps':/28de|steam/.test(id)?'steam':/2dc8|8bitdo/.test(id)?'8bitdo':'xbox'},
+ start(go,first){if(!go)return;const t=s=>g.No2I18n?.t?.(s)??s,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,w=document.querySelector('#loading-card .lc-pad'),order=['xbox','ps','8bitdo','steam'];let i=0;
+  const show=k=>{const seen=this.pad(),lines=[first,seen?'controller ready':'connect a controller for the best experience','version '+(g.No2Catalog?.version||'')];go.textContent=t(lines[k]);
+   if(w){if(k===1){w.dataset.show=seen||order[this.n++%4];w.classList.add('on')}else w.classList.remove('on')}};
   clearInterval(this.timer);this.timer=setInterval(()=>{const card=document.getElementById('loading-card');if(!card||!card.isConnected||!go.isConnected){clearInterval(this.timer);return}
-   i=(i+1)%3;if(reduce){go.textContent=t(lines()[i]);return}go.classList.add('lc-dim');setTimeout(()=>{go.textContent=t(lines()[i]);go.classList.remove('lc-dim')},480)},3200)}};
-g.No2LoadingLine=No2LoadingLine;setInterval(()=>{if(document.getElementById('loading-card'))No2LoadingLine.pad()},300);
+   i=(i+1)%3;if(reduce){show(i);return}go.classList.add('lc-dim');w?.classList.remove('on');setTimeout(()=>{show(i);go.classList.remove('lc-dim')},480)},3200)}};
+g.No2LoadingLine=No2LoadingLine;
 
 function ids(panel){return (panel.layers||[]).map(x=>x.asset)}
 function ready(panel,assets){return ids(panel).every(id=>assets.loaded.has(id))}
