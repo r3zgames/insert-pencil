@@ -11,9 +11,10 @@ cd "$(dirname "$0")/.."
 VERSION=$(node -p "require('./build/manifest.json').version")
 NAME="No. 2 Arcade"
 OUT=desktop/out
-REL=Releases
+REL=${NO2_REL:-Releases}   # NO2_REL=<dir> puts test builds somewhere else, never over the release zips
 TARGETS=${*:-mac win linux}
 mkdir -p "$OUT" "$REL"
+REL=$(cd "$REL" && pwd)
 
 echo "website build into desktop/web"
 rm -rf desktop/web
@@ -72,13 +73,13 @@ for t in $TARGETS; do
       pack win32 x64 desktop/out/icon.ico
       node desktop/fuses.cjs "$OUT/$NAME-win32-x64/$NAME.exe"
       rm -f "$REL/No2-Arcade-v$VERSION-windows.zip"
-      (cd "$OUT/$NAME-win32-x64" && zip -q -r -9 "../../../$REL/No2-Arcade-v$VERSION-windows.zip" .) ;;
+      (cd "$OUT/$NAME-win32-x64" && zip -q -r -9 "$REL/No2-Arcade-v$VERSION-windows.zip" .) ;;
     linux)
       echo "Linux (x64)"
       pack linux x64 desktop/icon.png
       node desktop/fuses.cjs "$OUT/$NAME-linux-x64/$NAME"
       rm -f "$REL/No2-Arcade-v$VERSION-linux.zip"
-      (cd "$OUT/$NAME-linux-x64" && zip -q -r -y -9 "../../../$REL/No2-Arcade-v$VERSION-linux.zip" .) ;;
+      (cd "$OUT/$NAME-linux-x64" && zip -q -r -y -9 "$REL/No2-Arcade-v$VERSION-linux.zip" .) ;;
   esac
 done
 
