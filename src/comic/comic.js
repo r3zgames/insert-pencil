@@ -3,6 +3,19 @@
 // ('comic-page-3-fr'), else the English page.
 function comicPanels(){const L=globalThis.No2I18n?.lang||'en',P=No2AssetData.comic.panels;if(L==='en')return P;const ids=new Set((No2AssetData.assets||[]).map(a=>a.id));return P.map(p=>ids.has(p.asset+'-'+L)?{...p,asset:p.asset+'-'+L}:p)}
 (function(g){
+// The loading cassette's line: at the start gate it takes turns, fading through black, between how to
+// start, the version and a word about controllers ("controller ready", with that pad's painting below, once one is seen:
+// PlayStation 054c, Steam 28de, 8BitDo 2dc8, any other XBOX). The paintings under it fade to black one after another (CSS).
+const No2LoadingLine={timer:0,seen:'',
+ pad(){const card=document.getElementById('loading-card'),w=card?.querySelector('.lc-pad');if(!w)return'';let p=null;try{p=[...(navigator.getGamepads?.()||[])].find(Boolean)}catch{}
+  if(!p)return this.seen;const id=String(p.id).toLowerCase(),k=/054c|playstation|dualsense|dualshock/.test(id)?'ps':/28de|steam/.test(id)?'steam':/2dc8|8bitdo/.test(id)?'8bitdo':'xbox';
+  if(w.dataset.pad!==k){w.dataset.pad=k;w.classList.add('seen')}return this.seen=k},
+ start(go,first){if(!go)return;const t=s=>g.No2I18n?.t?.(s)??s,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;let i=0;
+  const lines=()=>[first,this.pad()?'controller ready':'connect a controller for the best experience','version '+(g.No2Catalog?.version||'')];
+  clearInterval(this.timer);this.timer=setInterval(()=>{const card=document.getElementById('loading-card');if(!card||!card.isConnected||!go.isConnected){clearInterval(this.timer);return}
+   i=(i+1)%3;if(reduce){go.textContent=t(lines()[i]);return}go.classList.add('lc-dim');setTimeout(()=>{go.textContent=t(lines()[i]);go.classList.remove('lc-dim')},480)},3200)}};
+g.No2LoadingLine=No2LoadingLine;setInterval(()=>{if(document.getElementById('loading-card'))No2LoadingLine.pad()},300);
+
 function ids(panel){return (panel.layers||[]).map(x=>x.asset)}
 function ready(panel,assets){return ids(panel).every(id=>assets.loaded.has(id))}
 function pageHeight(panels){return panels[0]?.page===1?1500:panels[0]?.page===7?907:1000}
@@ -139,7 +152,7 @@ if(this.titleFade>0&&this.titleSnapshot){g.save();g.globalAlpha=this.titleFade/.
 // The start gate (see start): shown once the title can show; the bar full, the tape wound, the prompt under the bar.
 openGate(title){const done=()=>{if(!this.active||this.phase!=='gate')return;const card=document.getElementById('loading-card'),bar=card?.querySelector('b i');
   if(bar){bar.style.animation='none';bar.style.transform='scaleX(1)'}for(const p of card?.querySelectorAll('.inside .pack')||[]){p.style.animation='none';p.style.transform='scale('+(p.classList.contains('l')?.543:1)+')'}
-  const go=card?.querySelector('.lc-go'),touch=matchMedia('(pointer: coarse)').matches&&!matchMedia('(pointer: fine)').matches,text=touch?'tap to start':'click or press any key or button to start';if(go)go.textContent=g.No2I18n?.t?.(text)??text;
+  const go=card?.querySelector('.lc-go'),touch=matchMedia('(pointer: coarse)').matches&&!matchMedia('(pointer: fine)').matches,text=touch?'tap to start':'click or press any key or button to start';if(go)go.textContent=g.No2I18n?.t?.(text)??text;g.No2LoadingLine?.start(go,text);
   document.documentElement.classList.add('no2-gate');this.gateReady=true};
  Promise.resolve(title).then(done,done)}
 passGate(pad){this.host.services.audio.unlock?.();this.gateReady=false;document.documentElement.classList.add('no2-go');this.wallLast=performance.now();

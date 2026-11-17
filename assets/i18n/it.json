@@ -1052,7 +1052,9 @@
   "mid": "centro",
   "R3Z Games presents": "R3Z Games presenta",
   "new version": "nuova versione",
-  "click to download it": "clicca per scaricarla"
+  "click to download it": "clicca per scaricarla",
+  "controller ready": "controller pronto",
+  "connect a controller for the best experience": "collega un controller per giocare al meglio"
  },
  "patterns": [
   ["^version (\\d+\\.\\d+\\.\\d+) is out$", "è uscita la versione $1"],

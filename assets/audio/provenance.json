@@ -641,10 +641,43 @@
    "candidate": "../jimothy-rain-city-rumble/assets/audio/sfx/studio_sting.wav",
    "candidateSha256": "f9342760e836ccd7ca3b0a87e64e31f9d88857bdca54cea35be737fc7aa19c78",
    "gainDb": -6.94,
+   "pencil": [
+    {
+     "sound": "art/audio/sting/sting-pencil-tap-v1.mp3",
+     "at": 1.98,
+     "gain": 0.8,
+     "sha256": "c7c26325d8fa3084f19d92b18a30b1309f175b9db23934db4a5221b4cacb1641"
+    },
+    {
+     "sound": "art/audio/sting/sting-pencil-tap-v1.mp3",
+     "at": 2.18,
+     "gain": 0.8,
+     "sha256": "c7c26325d8fa3084f19d92b18a30b1309f175b9db23934db4a5221b4cacb1641"
+    },
+    {
+     "sound": "art/audio/sting/sting-pencil-tap-v1.mp3",
+     "at": 2.74,
+     "gain": 0.9,
+     "sha256": "c7c26325d8fa3084f19d92b18a30b1309f175b9db23934db4a5221b4cacb1641"
+    },
+    {
+     "sound": "art/audio/sting/sting-pencil-write-v1.mp3",
+     "at": 2.75,
+     "gain": 0.9,
+     "sha256": "94b865c2c0473c52d70f938f054c705649ea2aa453351529da057857e0e74143"
+    },
+    {
+     "sound": "art/audio/sting/sting-pencil-jump-v1.mp3",
+     "at": 3.3,
+     "gain": 0.8,
+     "sha256": "f108fbe30a1852473c43c32342c006aa4091578847267920b200162122f05e1e"
+    }
+   ],
+   "pencilCapDb": 0.0,
    "model": "code synthesis (Jimothy: Rain City Rumble tools/gen_audio.py, STING)",
    "file": "assets/audio/sfx/studio-sting.m4a",
-   "sha256": "4b0b5f5a5b3f76177a351eff2ead6ef1d51a3a787a4a5df4043ac115fdf283f9",
-   "bytes": 71025
+   "sha256": "1dc9bc104d2abf8f35b5cc7acee0d1d4cec6791dbafca102ccb37a84fd4ff219",
+   "bytes": 71059
   }
  },
  "games": {
