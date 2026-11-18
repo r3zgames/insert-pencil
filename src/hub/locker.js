@@ -1017,7 +1017,8 @@ body.locker-hub #book-chrome{align-items:center!important;height:auto!important}
 body.locker-hub #book-chrome :is(#close-book,#book-breadcrumb){background:url(${TAPE_A}) center/100% 100% no-repeat!important;color:#152e43!important;border-radius:0!important;padding:.35em 1em .45em!important;box-shadow:none!important;text-shadow:none!important;filter:drop-shadow(2px 4px 5px #1e18305c)}
 /* Buttons are bands of white correction tape she laid down to write on. */
 body.locker-hub #book-chrome #book-breadcrumb{background-image:url(@@asset:assets/ui/tape-d.webp@@)!important}
-body.locker-hub #close-book{transform:rotate(-1.2deg)}body.locker-hub:has(#desk-dialog[open]) #close-book{visibility:hidden}body.locker-hub #book-breadcrumb{transform:rotate(.8deg)}
+/* tilted tape with a shadow gets its own layer: Chrome 157 left the text of a rotated box with a filter unpainted */
+body.locker-hub #close-book{transform:rotate(-1.2deg);will-change:transform}body.locker-hub:has(#desk-dialog[open]) #close-book{visibility:hidden}body.locker-hub #book-breadcrumb{transform:rotate(.8deg);will-change:transform}
 body.locker-hub #close-book .device-glyph{mix-blend-mode:normal!important}
 
 /* Lettered page headings read as titles: large, centred, shrunk only when the page is too narrow. */
@@ -1105,7 +1106,7 @@ body.locker-hub #desk-dialog #dialog-content img.pad-pic{display:block;margin:0 
 #lyrics-line.show{opacity:1}
 @media (max-width:560px){body.locker-hub #desk-dialog .options{grid-template-columns:1fr!important}body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case{width:min(100%,220px)!important}}
 /* the song list on the playing tape's case card */
-body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case{position:relative;width:min(100%,calc(270 * var(--u)));aspect-ratio:480/720;background:var(--case) center/100% 100% no-repeat;filter:drop-shadow(0 3px 4px rgba(40,30,20,.3));transform:rotate(-1.5deg);margin-top:.3em}
+body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case{position:relative;width:min(100%,calc(270 * var(--u)));aspect-ratio:480/720;background:var(--case) center/100% 100% no-repeat;filter:drop-shadow(0 3px 4px rgba(40,30,20,.3));transform:rotate(-1.5deg);will-change:transform;margin-top:.3em}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case ol.tape-songs{position:absolute;left:14%;right:9%;top:calc(var(--ruled) * 100% + .4em);margin:0!important;padding:0!important;border:0!important}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case ol.tape-songs li{font-size:var(--t-control)!important;margin:0 0 .45em!important;color:#1b3591;line-height:1.15;list-style:decimal;list-style-position:inside}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case ol.tape-songs li.playing::before{left:-1.05em}
