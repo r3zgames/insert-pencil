@@ -114,7 +114,7 @@ form.keycard button{justify-self:end;all:unset;cursor:pointer;color:var(--ink);f
 <main>
 <header>
  <h1><img class="icon" src="icon.webp" alt="" width="278" height="320"><img src="heading.webp" alt="play stats" width="1000" height="482"></h1>
- <p class="sub" id="asof">players who share their scores online, UTC days</p>
+ <p class="sub" id="asof">players who share their scores online, Seattle time</p>
 </header>
 <div id="app"></div>
 </main>
@@ -145,7 +145,7 @@ async function load(){/* public since 2026-11-01: no key is ever sent (a key hea
  if(r.status===429)return app.replaceChildren(mk('p','msg','that is a lot of looking. try again in a while.'));
  if(r.status===404)return app.replaceChildren(mk('p','msg','no stats here yet.'));
  if(!r.ok)return app.replaceChildren(mk('p','msg','the server said '+r.status+'.'));
- data=await r.json();await worldP;$('ruler').hidden=false;$('asof').textContent='players who share their scores online · UTC days · '+(data.owner?'including you':'without you')+' · updated '+new Date(data.now).toLocaleString();render()}
+ data=await r.json();await worldP;$('ruler').hidden=false;$('asof').textContent='players who share their scores online · Seattle time · '+(data.owner?'including you':'without you')+' · updated '+new Date(data.now).toLocaleString();render()}
 
 // Tooltip: rows of [label, value, color?].
 function showTip(e,head,rows){tip.innerHTML='<div class="h">'+esc(head)+'</div>'+rows.map(([l,v,c])=>'<div class="r"><span>'+(c?'<i style="background:'+c+'"></i>':'')+esc(l)+'</span><b>'+esc(v)+'</b></div>').join('');tip.style.display='block';
@@ -245,9 +245,9 @@ function render(){piece=0;const d=data,S=d.series,T=d.totals,c1=css('--s1'),c2=c
  const split=(title,sub,list,name)=>{const c=card(title,sub);const rows=list.map(x=>({label:name?name(x.k):x.k,v:x.players}));c.append(rows.length?barList(rows,[{key:'v',label:'players',color:seq}]):mk('p','sub','nothing yet.'));return c};
  const whereC=mapCard(),langC=split('Languages','players by game language',d.langs,k=>LANG[k]||k),devC=split('Devices','players by what they played with',d.devices,k=>DEV[k]||k),verC=split('Versions','players by game version',d.versions,k=>'v'+k);
  const cw=d.comic.find(x=>x.k==='watched')?.n||0,cs=d.comic.find(x=>x.k==='skipped')?.n||0;c=card('Intro comic','watched to the last panel or skipped');c.append(barList([{label:'watched',v:cw},{label:'skipped',v:cs}],[{key:'v',label:'times',color:seq}],(r,t)=>fmt(t)+' · '+pct(t,cw+cs)));const comicC=c;
- const H=Array.from({length:24},(_,h)=>({h,n:d.hours.find(x=>x.h===h)?.n||0}));c=card('When they play','games started by hour of day (UTC)');
+ const H=Array.from({length:24},(_,h)=>({h,n:d.hours.find(x=>x.h===h)?.n||0}));c=card('When they play','games started by hour of day (Seattle time)');
  const mx=Math.max(1,...H.map(x=>x.n)),hb=mk('div');hb.innerHTML='<svg viewBox="0 0 560 150" role="img" aria-label="Games by hour of day">'+H.map(x=>{const w=560/24-3,h=x.n/mx*118,X=x.h*560/24+1.5;return(h?'<rect x="'+X+'" y="'+(124-h)+'" width="'+w+'" height="'+h+'" rx="3" fill="'+seq+'" data-h="'+x.h+'"/>':'')+(x.h%3===0?'<text x="'+(X+w/2)+'" y="142" text-anchor="middle">'+x.h+'h</text>':'')}).join('')+'</svg>';
- hb.querySelectorAll('rect').forEach(r=>{r.onmousemove=e=>showTip(e,r.dataset.h+':00 to '+r.dataset.h+':59 UTC',[['games',fmt(H[r.dataset.h].n)]]);r.onmouseleave=hideTip});c.append(hb);const hoursC=c;
+ hb.querySelectorAll('rect').forEach(r=>{r.onmousemove=e=>showTip(e,r.dataset.h+':00 to '+r.dataset.h+':59 Seattle time',[['games',fmt(H[r.dataset.h].n)]]);r.onmouseleave=hideTip});c.append(hb);const hoursC=c;
  group('who plays',[uniqC],[newpC,sessC]);
  group('what they play',[mostC],[gamesC,timeC,hoursC,comicC]);
  group('how they play',[],[devC,langC,verC]);

@@ -272,6 +272,22 @@ await test('the stats are public, totals only, and leave the maker out', async (
   const e2 = { ...env, RATE_STATS: '2' }; for (let i = 0; i < 2; i++) await handle(new Request(base + '/stats?days=7', { headers: { 'CF-Connecting-IP': '5.5.5.5' } }), e2, at);
   assert.equal((await handle(new Request(base + '/stats?days=7', { headers: { 'CF-Connecting-IP': '5.5.5.5' } }), e2, at)).status, 429);
 });
+await test('play stats run on Seattle time: a late evening play counts on its Pacific day and hour', async () => {
+  const env3 = { DB: new FakeD1(), ALLOWED_ORIGINS: 'null', IP_SALT: 'test' }, t = Date.parse('2026-11-11T05:30:00Z'); // 21:30 on the 10th in Seattle
+  const r = await handle(Object.assign(new Request(base + '/events', { method: 'POST', body: JSON.stringify({ playerId: 'a'.repeat(32), version: '0.16.11', lang: 'en', device: 'touch', events: [{ kind: 'run', game: 'galgebra', mode: 'normal', seconds: 60, score: 10 }] }), headers: { Origin: 'null', 'CF-Connecting-IP': '9.9.9.9' } }), { cf: { country: 'US' } }), env3, t);
+  assert.equal(r.status, 202);
+  assert.equal(env3.DB.db.prepare('SELECT day FROM plays').get().day, '2026-11-10');
+  const j = await (await handle(new Request(base + '/stats?days=8', { headers: { 'CF-Connecting-IP': '9.9.9.8' } }), env3, t)).json();
+  assert.equal(j.series.at(-1).day, '2026-11-10'); assert.equal(j.series.at(-1).runs, 1); assert.deepEqual(j.hours, [{ h: 21, n: 1 }]);
+  // migration 0006 dates every hour of three years as Seattle does, daylight time switches included
+  const fmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' });
+  const sql = fs.readFileSync(path.join(here, '../migrations/0006.sql'), 'utf8').match(/date\((\(at .*\)), 'unixepoch'\);/)[1];
+  const st = env3.DB.db.prepare("SELECT strftime('%Y-%m-%d %H', " + sql + ", 'unixepoch') v FROM (SELECT ? AS at)");
+  for (let at = Date.parse('2026-01-01T00:30:00Z'); at < Date.parse('2029-01-01T00:00:00Z'); at += 3600e3) {
+    const p = Object.fromEntries(fmt.formatToParts(at).map(x => [x.type, x.value]));
+    assert.equal(st.get(at).v, `${p.year}-${p.month}-${p.day} ${p.hour}`, new Date(at).toISOString());
+  }
+});
 await test('sticker runs (seeds 0x40000000 to 0x7FFFFFFF) have their own board and never reach the classic one', async () => {
   const ins = (pid, initials, score, seed) => env.DB.db.prepare("INSERT INTO scores (game, player_id, initials, score, seed, steps, version, replay_hash, created_at, status, verified_score) VALUES ('quiz', ?, ?, ?, ?, 1, '0.1.0', ?, 1, 'verified', ?)").run(pid, initials, score, seed, pid + seed, score);
   ins('1'.repeat(32), 'CLS', 500, 77); ins('2'.repeat(32), 'STK', 900, 0x40000000 + 77); ins('3'.repeat(32), 'HRD', 700, 0x80000000 + 77);

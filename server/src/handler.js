@@ -16,6 +16,12 @@ const VERSION = /^\d{1,3}\.\d{1,3}\.\d{1,4}$/;
 // Play stats: what a batch may carry. kind session (a launch), run (a real game played: game, mode,
 // seconds, score), comic (the intro: mode watched or skipped).
 const EVENT_BODY = 8192, EVENT_BATCH = 40, KINDS = new Set(['session', 'run', 'comic']), MODES = new Set(['normal', 'hard', 'daily', 'sticker', 'watched', 'skipped']);
+// Play stats run on Seattle time, not UTC: each play's day and hour are its Pacific date and hour.
+const PT = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit' });
+const ptDay = ms => PT.format(ms);
+// The same in SQL (no time zones in SQLite): seconds of Pacific wall time from a row's at (ms), with US daylight time from the
+// second Sunday of March 2:00 to the first Sunday of November 2:00 local. migrations/0006.sql re-dates older rows with it.
+const PT_SECS = "(at / 1000 - CASE WHEN at / 1000 >= CAST(strftime('%s', date(strftime('%Y', at / 1000, 'unixepoch') || '-03-01', 'weekday 0', '+7 days'), '+10 hours') AS INTEGER) AND at / 1000 < CAST(strftime('%s', date(strftime('%Y', at / 1000, 'unixepoch') || '-11-01', 'weekday 0'), '+9 hours') AS INTEGER) THEN 25200 ELSE 28800 END)";
 const LANGS = new Set(['en', 'fr', 'es', 'de', 'it']), DEVICES = new Set(['keyboard', 'xbox', 'touch']);
 // Printable text only: control characters (other than line breaks) go, runs of blank lines shrink to one.
 const cleanText = (s, max) => String(s).replace(/\r\n?/g, '\n').replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2066-\u2069]/g, '').replace(/\n{3,}/g, '\n\n').trim().slice(0, max);
@@ -172,7 +178,7 @@ export function createHandler(GAMES) {
     const ipKey = 'e:' + (await sha256((env.IP_SALT || 'no2') + ip)).slice(0, 24);
     if (!await underLimit(db, 'e:' + playerId, c.RATE_EVENTS, c.RATE_WINDOW, now) || !await underLimit(db, ipKey, c.RATE_EVENTS_IP, c.RATE_WINDOW, now))
       return json(429, { ok: false, error: 'slow down' }, { 'Retry-After': String(c.RATE_WINDOW) });
-    const day = new Date(now).toISOString().slice(0, 10), country = /^[A-Z]{2}$/.test(request.cf?.country || '') ? request.cf.country : null;
+    const day = ptDay(now), country = /^[A-Z]{2}$/.test(request.cf?.country || '') ? request.cf.country : null;
     const region = country && typeof request.cf?.region === 'string' ? cleanText(request.cf.region, 60).replace(/\n/g, ' ') || null : null;
     const L = LANGS.has(lang) ? lang : null, D = DEVICES.has(device) ? device : null;
     for (const [kind, game, mode, seconds, score] of rows)
@@ -200,7 +206,7 @@ export function createHandler(GAMES) {
     const days = Math.max(7, Math.min(365, Number.parseInt(url.searchParams.get('days') || '90', 10) || 90));
     const keepOwner = url.searchParams.get('owner') === '1';
     const NOT = keepOwner ? '1' : "player_id NOT IN (SELECT DISTINCT player_id FROM scores WHERE initials = 'REZ') AND player_id NOT IN (SELECT player_id FROM bans)";
-    const dayOf = ms => new Date(ms).toISOString().slice(0, 10), today = dayOf(now), from = dayOf(now - (days - 1) * 864e5);
+    const shift = (d, n) => new Date(Date.parse(d + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10), today = ptDay(now), from = shift(today, -(days - 1));
     const q = async (sql, ...a) => (await db.prepare(sql).bind(...a).all()).results;
     // Who was seen on which day (all time, for first days and retention), then everything else grouped in SQL.
     const seen = await q('SELECT day, player_id FROM plays WHERE ' + NOT + ' GROUP BY day, player_id');
@@ -211,14 +217,14 @@ export function createHandler(GAMES) {
     // Regions: Cloudflare's region inside each country, for the page's list beside the map.
     const regions = await q("SELECT country, region, COUNT(DISTINCT player_id) players FROM plays WHERE day >= ?1 AND region IS NOT NULL AND " + NOT + ' GROUP BY country, region ORDER BY players DESC LIMIT 30', from);
     const comic = await q("SELECT mode AS k, COUNT(*) n FROM plays WHERE kind = 'comic' AND day >= ?1 AND " + NOT + ' GROUP BY mode', from);
-    const hours = await q("SELECT CAST((at / 3600000) % 24 AS INTEGER) h, COUNT(*) n FROM plays WHERE kind = 'run' AND day >= ?1 AND " + NOT + ' GROUP BY h', from);
+    const hours = await q("SELECT CAST(strftime('%H', " + PT_SECS + ", 'unixepoch') AS INTEGER) h, COUNT(*) n FROM plays WHERE kind = 'run' AND day >= ?1 AND " + NOT + ' GROUP BY h', from);
     const ranPlayers = await q("SELECT COUNT(DISTINCT player_id) n FROM plays WHERE kind = 'run' AND " + NOT);
     // Players who finished at least one real game today (not everyone who opened it).
     const ranToday = await q("SELECT COUNT(DISTINCT player_id) n FROM plays WHERE kind = 'run' AND day = ?1 AND " + NOT, today);
     // Daily, weekly (7 days) and monthly (30 days) unique users, new users, and day-1 / day-7 return of each day's newcomers.
     const byDay = new Map(), first = new Map();
     for (const r of seen) { (byDay.get(r.day) || byDay.set(r.day, new Set()).get(r.day)).add(r.player_id); if (!first.has(r.player_id) || r.day < first.get(r.player_id)) first.set(r.player_id, r.day); }
-    const shift = (d, n) => dayOf(Date.parse(d + 'T00:00:00Z') + n * 864e5), within = (d, n) => { const s = new Set(); for (let i = 0; i < n; i++) for (const p of byDay.get(shift(d, -i)) || []) s.add(p); return s.size; };
+    const within = (d, n) => { const s = new Set(); for (let i = 0; i < n; i++) for (const p of byDay.get(shift(d, -i)) || []) s.add(p); return s.size; };
     const runs = Object.fromEntries(runsDay.map(r => [r.day, r])), sess = Object.fromEntries(sessDay.map(r => [r.day, r.sessions]));
     const newOn = new Map(); for (const [p, d] of first) (newOn.get(d) || newOn.set(d, []).get(d)).push(p);
     const series = []; for (let d = from; d <= today; d = shift(d, 1)) {

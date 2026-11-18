@@ -163,4 +163,6 @@ The game sends small anonymous batches to `POST /events` while "share my scores 
 
 Regions (migration 0005): the batch's Cloudflare region (state, province) is kept next to its country for the page's world map and region list; no city, no coordinates.
 
+Seattle time (migration 0006): play stats count days and hours in America/Los_Angeles, daylight time included, instead of UTC. New plays are dated in Pacific time; 0006 re-dates the stored ones from their timestamps (safe to run again). Setup: `npx wrangler d1 migrations apply no2-arcade-leaderboard --remote`, then `npm run deploy`.
+
 Setup: `npx wrangler d1 migrations apply no2-arcade-leaderboard --remote` (applies 0004 and 0005), then `npm run deploy`. The `STATS_TOKEN` secret from the first version is no longer used (`npx wrangler secret delete STATS_TOKEN` removes it).
