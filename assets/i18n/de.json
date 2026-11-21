@@ -1056,7 +1056,13 @@
   "new version": "neue Version",
   "click to download it": "klick, um sie zu laden",
   "controller ready": "Controller bereit",
-  "connect a controller for the best experience": "schließ einen Controller an, so spielt es sich am besten"
+  "connect a controller for the best experience": "schließ einen Controller an, so spielt es sich am besten",
+  "Every mixtape gets a side B: five new songs per tape, ten in all, and the tape case on the Walkman page turns over to show them.": "Jedes Mixtape hat jetzt eine B-Seite: fünf neue Songs pro Kassette, zehn insgesamt, und die Kassettenhülle auf der Walkman-Seite lässt sich umdrehen, um sie zu zeigen.",
+  "side A · turn it over": "Seite A · umdrehen",
+  "side B · turn it over": "Seite B · umdrehen",
+  "flip": "drehen",
+  "showing side A, turn the tape over": "Seite A zu sehen, Kassette umdrehen",
+  "showing side B, turn the tape over": "Seite B zu sehen, Kassette umdrehen"
  },
  "patterns": [
   ["^version (\\d+\\.\\d+\\.\\d+) is out$", "Version $1 ist da"],

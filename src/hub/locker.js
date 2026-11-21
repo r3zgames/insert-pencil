@@ -883,6 +883,9 @@ body.locker-hub #desk-dialog #dialog-content .tape-now-block p{margin:0}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case ol.tape-songs li.tape-link{font-size:var(--t-meta)!important;margin:0 0 .3em!important;line-height:1.1;opacity:.9}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-case.case-links ol.tape-songs{left:13%;right:13%}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-mode{margin-top:.25em;text-align:center;opacity:.8}
+/* A ten-song tape: the case shows one side, this line turns it over (F, LT or a tap) */
+body.locker-hub #desk-dialog #dialog-content .tape-now-block button.tape-side{display:block;margin:.35em auto 0;background:none!important;border:0!important;box-shadow:none!important;padding:.1em .4em!important;font-family:Hand,Schoolhand,sans-serif!important;font-size:var(--t-control)!important;color:#1b3591!important;text-decoration:underline;text-decoration-color:rgba(27,53,145,.35);text-underline-offset:.2em;cursor:pointer;white-space:nowrap}
+@media (max-height:560px){body.locker-hub #desk-dialog #dialog-content .tape-now-block button.tape-side{display:none}}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-kicker{color:#c0392b;opacity:1}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block .tape-song{font-size:var(--t-body)!important;color:#1b3591;line-height:1.1;margin:.1em 0}
 body.locker-hub #desk-dialog #dialog-content .tape-now-block ol.tape-songs{margin:.5em 0 0 1.5em;padding:0}

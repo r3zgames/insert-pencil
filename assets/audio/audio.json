@@ -620,6 +620,31 @@
     "src": "@@asset:assets/audio/mixtapes/her-5.m4a@@",
     "seconds": 148.619,
     "title": "Continue"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/her-6.m4a@@",
+    "seconds": 147.125,
+    "title": "Long Shadow"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/her-7.m4a@@",
+    "seconds": 146.485,
+    "title": "Odd Jobs"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/her-8.m4a@@",
+    "seconds": 144.171,
+    "title": "Orbit"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/her-9.m4a@@",
+    "seconds": 150.016,
+    "title": "Open the Filter"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/her-10.m4a@@",
+    "seconds": 154.208,
+    "title": "Here They Come"
    }
   ],
   "ace": [
@@ -647,6 +672,31 @@
     "src": "@@asset:assets/audio/mixtapes/ace-5.m4a@@",
     "seconds": 150.677,
     "title": "Overdrive Friday"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/ace-6.m4a@@",
+    "seconds": 155.563,
+    "title": "Rematch"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/ace-7.m4a@@",
+    "seconds": 151.221,
+    "title": "Under the Line"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/ace-8.m4a@@",
+    "seconds": 150.539,
+    "title": "Faster Than the News"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/ace-9.m4a@@",
+    "seconds": 150.091,
+    "title": "Heavy Crown"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/ace-10.m4a@@",
+    "seconds": 149.653,
+    "title": "Side by Side"
    }
   ],
   "hal": [
@@ -674,6 +724,31 @@
     "src": "@@asset:assets/audio/mixtapes/hal-5.m4a@@",
     "seconds": 139.2,
     "title": "Rain on the Marquee"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/hal-6.m4a@@",
+    "seconds": 150.4,
+    "title": "Saturday Rush"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/hal-7.m4a@@",
+    "seconds": 161.12,
+    "title": "Photograph Behind the Register"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/hal-8.m4a@@",
+    "seconds": 151.957,
+    "title": "Crooked Clock"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/hal-9.m4a@@",
+    "seconds": 154.912,
+    "title": "Gumball Waltz"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/hal-10.m4a@@",
+    "seconds": 149.739,
+    "title": "Milk Truck at Dawn"
    }
   ],
   "theo": [
@@ -701,6 +776,31 @@
     "src": "@@asset:assets/audio/mixtapes/theo-5.m4a@@",
     "seconds": 141.408,
     "title": "Big Dreams, Small Change"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/theo-6.m4a@@",
+    "seconds": 150.432,
+    "title": "Last Stop"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/theo-7.m4a@@",
+    "seconds": 149.291,
+    "title": "Seat Saver"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/theo-8.m4a@@",
+    "seconds": 128.619,
+    "title": "Foggy Windows"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/theo-9.m4a@@",
+    "seconds": 138.069,
+    "title": "Between the Bells"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/theo-10.m4a@@",
+    "seconds": 149.44,
+    "title": "Keep the Lights On"
    }
   ],
   "june": [
@@ -728,6 +828,31 @@
     "src": "@@asset:assets/audio/mixtapes/june-5.m4a@@",
     "seconds": 148.651,
     "title": "Signal Lost"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/june-6.m4a@@",
+    "seconds": 156.224,
+    "title": "The Mile"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/june-7.m4a@@",
+    "seconds": 139.755,
+    "title": "Fire Drill"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/june-8.m4a@@",
+    "seconds": 153.835,
+    "title": "Power Down"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/june-9.m4a@@",
+    "seconds": 150.059,
+    "title": "Mile Markers"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/june-10.m4a@@",
+    "seconds": 148.341,
+    "title": "Brown Paper"
    }
   ],
   "albright": [
@@ -755,6 +880,31 @@
     "src": "@@asset:assets/audio/mixtapes/albright-5.m4a@@",
     "seconds": 148.373,
     "title": "Friday Night Fractions"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/albright-6.m4a@@",
+    "seconds": 152.363,
+    "title": "Carry the One"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/albright-7.m4a@@",
+    "seconds": 149.909,
+    "title": "Long Division"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/albright-8.m4a@@",
+    "seconds": 150.869,
+    "title": "Exponential"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/albright-9.m4a@@",
+    "seconds": 155.339,
+    "title": "Prime Time"
+   },
+   {
+    "src": "@@asset:assets/audio/mixtapes/albright-10.m4a@@",
+    "seconds": 143.317,
+    "title": "Quite Easily Dancing"
    }
   ]
  },
