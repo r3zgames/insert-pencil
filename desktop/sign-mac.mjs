@@ -1,10 +1,10 @@
 // macOS signing for tools/desktop.sh, after the fuses are flipped.
 // With a "Developer ID Application" identity in the keychain: signs the app with the hardened runtime and
-// desktop/entitlements.mac.plist, then, with the notarytool keychain profile "no2arcade-notary", notarizes it
+// desktop/entitlements.mac.plist, then, with the notarytool keychain profile "r3z-notary", notarizes it
 // (xcrun notarytool submit --wait), staples the ticket and checks it with stapler and spctl.
 // Without the identity (until the R3Z Games LLC enrollment is approved): ad-hoc signs as before and exits 0.
 // One-time setup on the signing Mac: create the Developer ID Application certificate, then
-//   xcrun notarytool store-credentials no2arcade-notary
+//   xcrun notarytool store-credentials r3z-notary
 // Usage: node desktop/sign-mac.mjs "<path to .app>"
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 const app = process.argv[2];
 if (!app || !fs.existsSync(app)) { console.error('usage: node desktop/sign-mac.mjs <app>'); process.exit(1); }
 const here = path.dirname(fileURLToPath(import.meta.url));
-const PROFILE = 'no2arcade-notary';
+const PROFILE = 'r3z-notary';
 const run = (cmd, args, opts = {}) => execFileSync(cmd, args, { stdio: opts.quiet ? 'pipe' : 'inherit', encoding: 'utf8' });
 
 const ids = run('security', ['find-identity', '-v', '-p', 'codesigning'], { quiet: true });
