@@ -1,8 +1,8 @@
 {
-  "output": "No2-Arcade-v0.17.2.html",
-  "version": "0.17.2",
-  "lockedSha256": "92c1761d2ce4aa150c23d70bb8ed803b532ceca19e98c387009d1664d10b991a",
-  "lockedContentSha256": "92c1761d2ce4aa150c23d70bb8ed803b532ceca19e98c387009d1664d10b991a",
+  "output": "No2-Arcade-v0.17.3.html",
+  "version": "0.17.3",
+  "lockedSha256": "de976028679be567ee9cdd759f4b13ef08018bcfd4a176a123a1b4106d1bcd1b",
+  "lockedContentSha256": "de976028679be567ee9cdd759f4b13ef08018bcfd4a176a123a1b4106d1bcd1b",
   "readme": "src/release/README.txt",
   "document": {
     "template": "src/index.html",
@@ -237,7 +237,8 @@
         "src/shell/host.js"
       ],
       "layout-audit": "src/shell/layout-audit.js",
-      "text-audit": "src/shell/text-audit.js"
+      "text-audit": "src/shell/text-audit.js",
+      "perf-meter": "src/shell/perf-meter.js"
     }
   }
 }
