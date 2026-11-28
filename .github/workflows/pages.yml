@@ -50,9 +50,14 @@ jobs:
           cp assets/arcade/v044/fonts/PatrickHand-Regular.ttf assets/arcade/v044/fonts/PermanentMarker-Regular.ttf _site/scores/fonts/
           # The intro comic review page for the story and art directors (unlisted, noindex): web-quality images, guide, brief.
           cp -R site/review _site/review
+          # Crawler and security files: robots.txt, sitemap.xml and security.txt at both
+          # /security.txt and /.well-known/security.txt (the upload below keeps hidden folders).
+          cp site/robots.txt site/sitemap.xml _site/
+          mkdir -p _site/.well-known && cp site/well-known/security.txt _site/.well-known/security.txt && cp site/well-known/security.txt _site/security.txt
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9   # v5.0.0
         with:
           path: _site
+          include-hidden-files: true
   deploy:
     needs: build
     runs-on: ubuntu-latest

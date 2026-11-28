@@ -44,10 +44,22 @@ subprocess.run(['iconutil', '-c', 'icns', d, '-o', 'desktop/out/icon.icns'], che
 # Assets.car); the square is full bleed and macOS rounds it itself. Older macOS keeps the .icns above.
 import json
 d = 'desktop/out/icon.icon'; shutil.rmtree(d, ignore_errors=True); os.makedirs(d + '/Assets')
-src.resize((1024, 1024), Image.LANCZOS).save(d + '/Assets/no2-arcade.png')
-json.dump({'fill': 'automatic', 'groups': [{'layers': [{'glass': False, 'image-name': 'no2-arcade.png', 'name': 'no2-arcade'}],
-  'shadow': {'kind': 'neutral', 'opacity': 0.5}, 'translucency': {'enabled': False, 'value': 0.5}}],
-  'supported-platforms': {'squares': ['macOS']}}, open(d + '/icon.json', 'w'), indent=2)
+L = 'art/ui-hub/app-icon/layers'
+if os.path.exists(L + '/mark.png') and os.path.exists(L + '/background.png'):
+    # layered so Clear and Tinted show the 2 as glass: the navy 2 alone on transparent is the glass group on
+    # top, the yellow crayon page under it is a plain layer; both full bleed, 1024 px (tools: art/ui-hub/app-icon/layers)
+    shutil.copy(L + '/mark.png', d + '/Assets/mark.png'); shutil.copy(L + '/background.png', d + '/Assets/background.png')
+    json.dump({'groups': [
+        {'layers': [{'glass': True, 'image-name': 'mark.png', 'name': 'mark'}],
+         'shadow': {'kind': 'neutral', 'opacity': 0.5}, 'translucency': {'enabled': True, 'value': 0.4}},
+        {'layers': [{'glass': False, 'image-name': 'background.png', 'name': 'background'}],
+         'shadow': {'kind': 'none', 'opacity': 0.5}, 'translucency': {'enabled': False, 'value': 0.5}}],
+      'supported-platforms': {'squares': ['macOS']}}, open(d + '/icon.json', 'w'), indent=2)
+else:  # the public repository has only the flat packed icon
+    src.resize((1024, 1024), Image.LANCZOS).save(d + '/Assets/no2-arcade.png')
+    json.dump({'fill': 'automatic', 'groups': [{'layers': [{'glass': False, 'image-name': 'no2-arcade.png', 'name': 'no2-arcade'}],
+      'shadow': {'kind': 'neutral', 'opacity': 0.5}, 'translucency': {'enabled': False, 'value': 0.5}}],
+      'supported-platforms': {'squares': ['macOS']}}, open(d + '/icon.json', 'w'), indent=2)
 EOF
 
 pack() { # platform arch icon

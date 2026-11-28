@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://no2arca.de/sitemap.xml
